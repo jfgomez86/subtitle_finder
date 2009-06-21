@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'cgi'
+require 'open-uri'
+require 'hpricot'
+query = CGI::escape(ARGV[0])
+url = "http://www.subdivx.com/index.php?buscar=#{query}&accion=5&masdesc=1&subtitulos=1&realiza_b=1"
+response = Hpricot(open(url))
+results = response/"div[@id=buscador_detalle_sub_datos]"
+download_links = results.map { |result| (result/"a > img").first.parent.get_attribute("href") }
+results = response/"div[@id=buscador_detalle_sub]"
+descriptions = results.map {|result| result.inner_html}
+final_results = [descriptions, download_links]
+descriptions.size.times do |i|
+  puts "#{i} -- #{final_results[0][i]}"
+  puts "#Download -- #{final_results[1][i]}"
+  puts "-"*80
+end
+
+# vim: set ft:ruby:
